@@ -98,6 +98,7 @@ set (SRCS
           )
 set (TSTS ${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp)
 set (DEV ${CMAKE_CURRENT_SOURCE_DIR}/test/dev.cpp)
+set (BANDITS ${CMAKE_CURRENT_SOURCE_DIR}/test/bandits.cpp)
 set (BENCH ${CMAKE_CURRENT_SOURCE_DIR}/test/benchmark.cpp)
 
 if (BUILD_ADVANCED)
@@ -137,9 +138,13 @@ if (BUILD_TESTS)
                         COMMENT "Running unit tests")
 endif (BUILD_TESTS)
 
-# **** BENCHMARK ****
-add_executable(benchmark EXCLUDE_FROM_ALL ${BENCH} )
-target_link_libraries(benchmark ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} craam)
+# **** benchmark ****
+add_executable(benchmark exclude_from_all ${bench} )
+target_link_libraries(benchmark ${boost_unit_test_framework_library} craam)
+
+# **** bandits ****
+add_executable(bandits ${BANDITS})
+target_link_libraries(bandits craam)
 
 # **** DOCUMENTATION ****
 if(BUILD_DOCUMENTATION)
