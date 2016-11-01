@@ -2,8 +2,8 @@
 
 #include "definitions.hpp"
 
-#include<vector>
-#include<string>
+#include <string>
+#include <vector>
 
 using namespace std;
 
@@ -21,7 +21,6 @@ const prec_t tolerance = 1e-5;
   prevent excessive performance degradation.
  */
 class Transition {
-
 public:
     Transition(){};
 
@@ -35,9 +34,7 @@ public:
     \param probabilities The probabilities of transitions
     \param rewards The associated rewards with each transition
     */
-    Transition(const indvec& indices,
-                const numvec& probabilities,
-                const numvec& rewards);
+    Transition(const indvec& indices, const numvec& probabilities, const numvec& rewards);
 
     /**
     Creates a single transition from raw data with uniformly zero rewards.
@@ -48,8 +45,7 @@ public:
     \param indices The indexes of states to transition to
     \param probabilities The probabilities of transitions
     */
-    Transition(const indvec& indices,
-                const numvec& probabilities);
+    Transition(const indvec& indices, const numvec& probabilities);
 
     /**
     Creates a single transition from raw data with uniformly zero rewards,
@@ -71,10 +67,10 @@ public:
             \f[ p'(s) = p(s) + p \f]
         - Reward:
             \f[ r'(s) = \frac{p(s) \, r(s) + p \, r}{p'(s)} \f]
-    Here, \f$ p \f$ is the argument probability and \f$ r \f$ is the argument 
+    Here, \f$ p \f$ is the argument probability and \f$ r \f$ is the argument
     reward.
 
-    When the function is called multiple times with \f$ p_1 \ldots p_n \f$ and 
+    When the function is called multiple times with \f$ p_1 \ldots p_n \f$ and
     \f$  r_1 \ldots r_n \f$ for a single \f$ s \f$ then:
         - Probability:
             \f[ p'(s) = \sum_{i=1}^{n} p_i \f]
@@ -115,16 +111,16 @@ public:
     prec_t mean_reward() const;
 
     /** Returns the number of target states with non-zero transition probabilities.  */
-    size_t size() const {return indices.size();};
+    size_t size() const { return indices.size(); };
 
     /** Checks if the transition is empty. */
-    bool empty() const {return indices.empty();};
+    bool empty() const { return indices.empty(); };
 
     /**
     Returns the maximal indexes involved in the transition.
     Returns -1 for and empty transition.
     */
-    long max_index() const {return indices.empty() ? -1 : indices.back();};
+    long max_index() const { return indices.empty() ? -1 : indices.back(); };
 
     /**
     Scales transition probabilities according to the provided parameter
@@ -160,32 +156,31 @@ public:
     */
     numvec rewards_vector(size_t size) const;
 
-    /** 
+    /**
     Indices with positive probabilities.
     */
-    const indvec& get_indices() const {return indices;};
-    /** 
+    const indvec& get_indices() const { return indices; };
+    /**
     Returns list of positive probabilities for indexes returned by
     get_indices. See also probabilities_vector.
     */
-    const numvec& get_probabilities() const {return probabilities;};
-    /** 
+    const numvec& get_probabilities() const { return probabilities; };
+    /**
     Rewards for indices with positive probabilities returned by
     get_indices. See also rewards_vector.
     */
-    const numvec& get_rewards() const {return rewards;};
+    const numvec& get_rewards() const { return rewards; };
 
     /** Sets the reward for a transition to a particular state */
-    void set_reward(long sampleid, prec_t reward) {rewards[sampleid] = reward;};
+    void set_reward(long sampleid, prec_t reward) { rewards[sampleid] = reward; };
     /** Gets the reward for a transition to a particular state */
-    prec_t get_reward(long sampleid) const {return rewards[sampleid];};
+    prec_t get_reward(long sampleid) const { return rewards[sampleid]; };
 
     /** Returns a json representation of transition probabilities
     \param outcomeid Includes also outcome id*/
     string to_json(long outcomeid = -1) const;
 
 protected:
-
     /// List of state indices
     indvec indices;
     /// List of probability distributions to states
@@ -193,5 +188,4 @@ protected:
     /// List of rewards associated with transitions
     numvec rewards;
 };
-
 }

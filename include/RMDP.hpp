@@ -2,12 +2,12 @@
 
 #include "State.hpp"
 
-#include <vector>
-#include <istream>
+#include <cassert>
 #include <fstream>
+#include <istream>
 #include <memory>
 #include <tuple>
-#include <cassert>
+#include <vector>
 
 #include <boost/numeric/ublas/matrix.hpp>
 
@@ -36,23 +36,27 @@ enum class Uncertainty {
 // **************************************************************************************
 
 /** A solution to a robust MDP.  */
-template<typename ActionId, typename OutcomeId>
+template <typename ActionId, typename OutcomeId>
 class GSolution {
 public:
     numvec valuefunction;
-    vector<ActionId> policy;                        // index of the actions for each states
-    vector<OutcomeId> outcomes;                      // index of the outcome for each state
+    vector<ActionId> policy; // index of the actions for each states
+    vector<OutcomeId> outcomes; // index of the outcome for each state
     prec_t residual;
     long iterations;
 
-    GSolution():
-        valuefunction(0), policy(0), outcomes(0),
-        residual(-1),iterations(-1) {};
+    GSolution() : valuefunction(0), policy(0), outcomes(0), residual(-1), iterations(-1){};
 
-    GSolution(numvec const& valuefunction, const vector<ActionId>& policy,
-             const vector<OutcomeId>& outcomes, prec_t residual = -1, long iterations = -1) :
-        valuefunction(valuefunction), policy(policy), outcomes(outcomes),
-        residual(residual),iterations(iterations) {};
+    GSolution(numvec const& valuefunction,
+            const vector<ActionId>& policy,
+            const vector<OutcomeId>& outcomes,
+            prec_t residual = -1,
+            long iterations = -1)
+            : valuefunction(valuefunction),
+              policy(policy),
+              outcomes(outcomes),
+              residual(residual),
+              iterations(iterations){};
 
     /**
     Computes the total return of the solution given the initial
@@ -62,8 +66,8 @@ public:
 
     \param initial The initial distribution
      */
-    prec_t total_return(const Transition& initial) const{
-        if(initial.max_index() >= (long) valuefunction.size())
+    prec_t total_return(const Transition& initial) const {
+        if (initial.max_index() >= (long)valuefunction.size())
             throw invalid_argument("Too many indexes in the initial distribution.");
         return initial.compute_value(valuefunction);
     };
@@ -87,14 +91,13 @@ Some general assumptions (may depend on the state and action classes):
 \tparam SType Type of state, determines s-rectangularity or s,a-rectangularity and
         also the type of the outcome and action constraints
  */
-template<class SType>
-class GRMDP{
+template <class SType>
+class GRMDP {
 protected:
     /** Internal list of states */
     vector<SType> states;
 
 public:
-
     /** Action identifier in a policy. Copies type from state type. */
     typedef typename SType::ActionId ActionId;
     /** Action identifier in a policy. Copies type from state type. */
@@ -105,8 +108,7 @@ public:
     /** Nature's policy: Which outcome to take in which state.  */
     typedef vector<OutcomeId> OutcomePolicy;
     /** Solution type */
-    typedef GSolution<typename SType::ActionId, typename SType::OutcomeId>
-                SolType;
+    typedef GSolution<typename SType::ActionId, typename SType::OutcomeId> SolType;
 
     /**
     Constructs the RMDP with a pre-allocated number of states. All
@@ -131,31 +133,34 @@ public:
     Creates a new state at the end of the states
     \return The new state
     */
-    SType& create_state(){ return create_state(states.size());};
+    SType& create_state() { return create_state(states.size()); };
 
     /** Number of states */
-    size_t state_count() const {return states.size();};
+    size_t state_count() const { return states.size(); };
 
     /** Number of states */
-    size_t size() const {return state_count();};
+    size_t size() const { return state_count(); };
 
     /** Retrieves an existing state */
-    const SType& get_state(long stateid) const {assert(stateid >= 0 && size_t(stateid) < state_count());
-                                                return states[stateid];};
+    const SType& get_state(long stateid) const {
+        assert(stateid >= 0 && size_t(stateid) < state_count());
+        return states[stateid];
+    };
 
     /** Retrieves an existing state */
-    const SType& operator[](long stateid) const {return get_state(stateid);};
-
-
-    /** Retrieves an existing state */
-    SType& get_state(long stateid) {assert(stateid >= 0 && size_t(stateid) < state_count());
-                                    return states[stateid];};
+    const SType& operator[](long stateid) const { return get_state(stateid); };
 
     /** Retrieves an existing state */
-    SType& operator[](long stateid){return get_state(stateid);};
+    SType& get_state(long stateid) {
+        assert(stateid >= 0 && size_t(stateid) < state_count());
+        return states[stateid];
+    };
+
+    /** Retrieves an existing state */
+    SType& operator[](long stateid) { return get_state(stateid); };
 
     /** \returns list of all states */
-    const vector<SType>& get_states() const {return states;};
+    const vector<SType>& get_states() const { return states; };
 
     /**
     Check if all transitions in the process sum to one.
@@ -176,8 +181,10 @@ public:
     \param policy Policy of the decision maker
     \param nature Policy of nature
     */
-    numvec ofreq_mat(const Transition& init, prec_t discount,
-                     const ActionPolicy& policy, const OutcomePolicy& nature) const;
+    numvec ofreq_mat(const Transition& init,
+            prec_t discount,
+            const ActionPolicy& policy,
+            const OutcomePolicy& nature) const;
 
     /**
     Constructs the rewards vector for each state for the RMDP.
@@ -192,8 +199,7 @@ public:
     \return If incorrect, the function returns the first state with an incorrect
             action and outcome. Otherwise the function return -1.
     */
-    long is_policy_correct(const ActionPolicy& policy,
-                           const OutcomePolicy& natpolicy) const;
+    long is_policy_correct(const ActionPolicy& policy, const OutcomePolicy& natpolicy) const;
 
     // ----------------------------------------------
     // Solution methods
@@ -201,7 +207,7 @@ public:
 
     /**
     Gauss-Seidel varaint of value iteration (not parallelized).
-    
+
     This function is suitable for computing the value function of a finite state MDP. If
     the states are ordered correctly, one iteration is enough to compute the optimal value function.
     Since the value function is updated from the first state to the last, the states should be ordered
@@ -216,10 +222,10 @@ public:
     \param maxresidual Stop when the maximal residual falls below this value.
      */
     SolType vi_gs(Uncertainty uncert,
-                  prec_t discount,
-                  numvec valuefunction=numvec(0),
-                  unsigned long iterations=MAXITER,
-                  prec_t maxresidual=SOLPREC) const;
+            prec_t discount,
+            numvec valuefunction = numvec(0),
+            unsigned long iterations = MAXITER,
+            prec_t maxresidual = SOLPREC) const;
 
     /**
     Jacobi variant of value iteration. This method uses OpenMP to parallelize the computation.
@@ -230,10 +236,10 @@ public:
     \param maxresidual Stop when the maximal residual falls below this value.
      */
     SolType vi_jac(Uncertainty uncert,
-                   prec_t discount,
-                   const numvec& valuefunction=numvec(0),
-                    unsigned long iterations=MAXITER,
-                    prec_t maxresidual=SOLPREC) const;
+            prec_t discount,
+            const numvec& valuefunction = numvec(0),
+            unsigned long iterations = MAXITER,
+            prec_t maxresidual = SOLPREC) const;
 
     /**
     Modified policy iteration using Jacobi value iteration in the inner loop.
@@ -253,13 +259,13 @@ public:
     \return Computed (approximate) solution
      */
     SolType mpi_jac(Uncertainty uncert,
-                    prec_t discount,
-                    const numvec& valuefunction=numvec(0),
-                    unsigned long iterations_pi=MAXITER,
-                    prec_t maxresidual_pi=SOLPREC,
-                    unsigned long iterations_vi=MAXITER,
-                    prec_t maxresidual_vi=SOLPREC/2,
-                    bool show_progress=false) const;
+            prec_t discount,
+            const numvec& valuefunction = numvec(0),
+            unsigned long iterations_pi = MAXITER,
+            prec_t maxresidual_pi = SOLPREC,
+            unsigned long iterations_vi = MAXITER,
+            prec_t maxresidual_vi = SOLPREC / 2,
+            bool show_progress = false) const;
 
     /**
     Value function evaluation using Jacobi iteration for a fixed policy.
@@ -274,11 +280,11 @@ public:
     \return Computed (approximate) solution (value function)
      */
     SolType vi_jac_fix(prec_t discount,
-                        const ActionPolicy& policy,
-                        const OutcomePolicy& natpolicy,
-                        const numvec& valuefunction=numvec(0),
-                        unsigned long iterations=MAXITER,
-                        prec_t maxresidual=SOLPREC) const;
+            const ActionPolicy& policy,
+            const OutcomePolicy& natpolicy,
+            const numvec& valuefunction = numvec(0),
+            unsigned long iterations = MAXITER,
+            prec_t maxresidual = SOLPREC) const;
 
     // TODO: a function like this could be useful
     /*
@@ -293,7 +299,7 @@ public:
             the residual drops below this threshold.
     \return Computed (approximate) solution (value function)
      */
-    //SolType vi_jac_fix(Uncertainty uncert,
+    // SolType vi_jac_fix(Uncertainty uncert,
     //                   prec_t discount,
     //                   const ActionPolicy& policy,
     //                   const numvec& valuefunction=numvec(0),
@@ -305,18 +311,14 @@ public:
     \param policy Policy of the decision maker
     \param nature Policy of the nature
     */
-    unique_ptr<ublas::matrix<prec_t>>
-        transition_mat(const ActionPolicy& policy,
-                       const OutcomePolicy& nature) const;
+    unique_ptr<ublas::matrix<prec_t>> transition_mat(const ActionPolicy& policy, const OutcomePolicy& nature) const;
 
     /**
     Constructs a transpose of the transition matrix for the policy.
     \param policy Policy of the decision maker
     \param nature Policy of the nature
     */
-    unique_ptr<ublas::matrix<prec_t>>
-        transition_mat_t(const ActionPolicy& policy,
-                         const OutcomePolicy& nature) const;
+    unique_ptr<ublas::matrix<prec_t>> transition_mat_t(const ActionPolicy& policy, const OutcomePolicy& nature) const;
 
     // ----------------------------------------------
     // Reading and writing files
@@ -393,6 +395,4 @@ typedef GRMDP<L1RobustState> RMDP_L1;
 typedef GSolution<long, long> SolutionDscDsc;
 /// Solution with discrete action and randomized outcome policy
 typedef GSolution<long, numvec> SolutionDscProb;
-
-
 }

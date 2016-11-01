@@ -3,24 +3,23 @@
 #include "RMDP.hpp"
 #include "Transition.hpp"
 
-#include <vector>
 #include <memory>
 #include <random>
+#include <vector>
 
 using namespace std;
 
-namespace craam{
+namespace craam {
 
 /// A namespace with tools for implementable, interpretable, and aggregated MDPs
-namespace impl{
+namespace impl {
 
 /**
 Represents an MDP with implementability constraints.
 
 Consists of an MDP and a set of observations.
 */
-class MDPI{
-
+class MDPI {
 public:
     /**
     Constructs the MDP with implementability constraints. This constructor makes it
@@ -36,8 +35,7 @@ public:
     \param initial A representation of the initial distribution. The rewards
                     in this transition are ignored (and should be 0).
     */
-    MDPI(const shared_ptr<const MDP>& mdp, const indvec& state2observ,
-         const Transition& initial);
+    MDPI(const shared_ptr<const MDP>& mdp, const indvec& state2observ, const Transition& initial);
 
     /**
     Constructs the MDP with implementability constraints. The MDP model is
@@ -53,9 +51,9 @@ public:
     MDPI(const MDP& mdp, const indvec& state2observ, const Transition& initial);
 
     size_t obs_count() const { return obscount; };
-    size_t state_count() const {return mdp->state_count(); };
-    long state2obs(long state){return state2observ[state];};
-    size_t action_count(long obsid) {return action_counts[obsid];};
+    size_t state_count() const { return mdp->state_count(); };
+    long state2obs(long state) { return state2observ[state]; };
+    size_t action_count(long obsid) { return action_counts[obsid]; };
 
     /**
     Converts a policy defined in terms of observations to a policy defined in
@@ -80,10 +78,10 @@ public:
     Transition transition2obs(const Transition& tran);
 
     /** Internal MDP representation */
-    shared_ptr<const MDP> get_mdp() {return mdp;};
+    shared_ptr<const MDP> get_mdp() { return mdp; };
 
     /** Initial distribution of MDP */
-    Transition get_initial() const {return initial;};
+    Transition get_initial() const { return initial; };
 
     /** Constructs a random observation policy */
     indvec random_policy(random_device::result_type seed = random_device{}());
@@ -95,7 +93,7 @@ public:
     \param discount Discount factor
     \return Discounted return of the policy
     */
-    prec_t total_return(const indvec& obspol, prec_t discount, prec_t precision=SOLPREC) const;
+    prec_t total_return(const indvec& obspol, prec_t discount, prec_t precision = SOLPREC) const;
 
     // save and load description.
     /**
@@ -106,8 +104,7 @@ public:
     \param output_state2obs Mapping states to observations
     \param output_initial Initial distribution
     */
-    void to_csv(ostream& output_mdp, ostream& output_state2obs, ostream& output_initial,
-                    bool headers = true) const;
+    void to_csv(ostream& output_mdp, ostream& output_state2obs, ostream& output_initial, bool headers = true) const;
 
     /**
     Saves the MDPI to a set of 3 csv files, for transitions, observations,
@@ -117,8 +114,10 @@ public:
     \param output_state2obs File name for mapping states to observations
     \param output_initial File name for initial distribution
     */
-    void to_csv_file(const string& output_mdp, const string& output_state2obs,
-                     const string& output_initial, bool headers = true) const;
+    void to_csv_file(const string& output_mdp,
+            const string& output_state2obs,
+            const string& output_initial,
+            bool headers = true) const;
 
     /**
     Loads an MDPI from a set of 3 csv files, for transitions, observations,
@@ -130,16 +129,18 @@ public:
     \param input_state2obs File name for mapping states to observations
     \param input_initial File name for initial distribution
      */
-    template<typename T = MDPI>
-    static unique_ptr<T> from_csv(istream& input_mdp, istream& input_state2obs,
-                                     istream& input_initial, bool headers = true);
-    template<typename T = MDPI>
+    template <typename T = MDPI>
+    static unique_ptr<T> from_csv(istream& input_mdp,
+            istream& input_state2obs,
+            istream& input_initial,
+            bool headers = true);
+    template <typename T = MDPI>
     static unique_ptr<T> from_csv_file(const string& input_mdp,
-                                          const string& input_state2obs,
-                                          const string& input_initial,
-                                          bool headers = true);
-protected:
+            const string& input_state2obs,
+            const string& input_initial,
+            bool headers = true);
 
+protected:
     /** the underlying MDP */
     shared_ptr<const MDP> mdp;
     /** maps index of a state to the index of the observation */
@@ -158,23 +159,19 @@ protected:
     static void check_parameters(const MDP& mdp, const indvec& state2observ, const Transition& initial);
 };
 
-
 /**
 An MDP with implementability constraints. The class contains solution
 methods that rely on robust MDP reformulation of the problem.
 
 Uses L1 version of the robust MDP
  */
-class MDPI_R : public MDPI{
-
+class MDPI_R : public MDPI {
 public:
-
     /**
     Calls the base constructor and also constructs the corresponding
     robust MDP
      */
-    MDPI_R(const shared_ptr<const MDP>& mdp, const indvec& state2observ,
-            const Transition& initial);
+    MDPI_R(const shared_ptr<const MDP>& mdp, const indvec& state2observ, const Transition& initial);
 
     /**
     Calls the base constructor and also constructs the corresponding
@@ -230,18 +227,19 @@ public:
     */
     indvec solve_robust(long iterations, prec_t threshold, prec_t discount, const indvec& initpol = indvec(0));
 
-    static unique_ptr<MDPI_R> from_csv(istream& input_mdp, istream& input_state2obs,
-                                     istream& input_initial, bool headers = true){
-
-        return MDPI::from_csv<MDPI_R>(input_mdp,input_state2obs,input_initial, headers);
+    static unique_ptr<MDPI_R> from_csv(istream& input_mdp,
+            istream& input_state2obs,
+            istream& input_initial,
+            bool headers = true) {
+        return MDPI::from_csv<MDPI_R>(input_mdp, input_state2obs, input_initial, headers);
     };
 
     /** Loads the class from an set of CSV files. See also from_csv. */
     static unique_ptr<MDPI_R> from_csv_file(const string& input_mdp,
-                                          const string& input_state2obs,
-                                          const string& input_initial,
-                                          bool headers = true){
-        return MDPI::from_csv_file<MDPI_R>(input_mdp,input_state2obs,input_initial, headers);
+            const string& input_state2obs,
+            const string& input_initial,
+            bool headers = true) {
+        return MDPI::from_csv_file<MDPI_R>(input_mdp, input_state2obs, input_initial, headers);
     };
 
 protected:
@@ -253,5 +251,5 @@ protected:
     /** Constructs a robust version of the implementable MDP.*/
     void initialize_robustmdp();
 };
-
-}}
+}
+}
