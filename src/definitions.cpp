@@ -1,7 +1,7 @@
+#include <assert.h>
 #include <algorithm>
 #include <numeric>
 #include <stdexcept>
-#include <assert.h>
 
 #include "definitions.hpp"
 
@@ -14,19 +14,26 @@ namespace craam {
 Introduction
 ------------
 
-Craam is a C++ library for solving *plain*, *robust*, or *optimistic* Markov decision processes. The library also provides basic tools that enable simulation and construction of MDPs from samples. There is also support for state aggregation and abstraction solution methods. 
+Craam is a C++ library for solving *plain*, *robust*, or *optimistic* Markov decision processes. The library also
+provides basic tools that enable simulation and construction of MDPs from samples. There is also support for state
+aggregation and abstraction solution methods.
 
-The library supports standard finite or infinite horizon discounted MDPs [Puterman2005]. Some basic stochazstic shortest path methods are also supported. The library assumes *maximization* over actions. The states and actions must be finite.
+The library supports standard finite or infinite horizon discounted MDPs [Puterman2005]. Some basic stochazstic shortest
+path methods are also supported. The library assumes *maximization* over actions. The states and actions must be finite.
 
-The robust model extends the regular MDPs [Iyengar2005]. The library allows to model uncertainty in *both* the transitions and rewards, unlike some published papers on this topic. This is modeled by adding an outcome to each action. The outcome is assumed to be minimized by nature, similar to [Filar1997].
+The robust model extends the regular MDPs [Iyengar2005]. The library allows to model uncertainty in *both* the
+transitions and rewards, unlike some published papers on this topic. This is modeled by adding an outcome to each
+action. The outcome is assumed to be minimized by nature, similar to [Filar1997].
 
 In summary, the MDP problem being solved is:
 
-\f[v(s) = \max_{a \in \mathcal{A}} \min_{o \in \mathcal{O}} \sum_{s\in\mathcal{S}} ( r(s,a,o,s') + \gamma P(s,a,o,s') v(s') ) ~.\f]
+\f[v(s) = \max_{a \in \mathcal{A}} \min_{o \in \mathcal{O}} \sum_{s\in\mathcal{S}} ( r(s,a,o,s') + \gamma P(s,a,o,s')
+v(s') ) ~.\f]
 
 Here, \f$\mathcal{S}\f$ are the states, \f$\mathcal{A}\f$ are the actions, \f$\mathcal{O}\f$ are the outcomes.
 
-Available algorithms are *value iteration* and *modified policy iteration*. The library support both the plain worst-case outcome method and a worst case with respect to a base distribution.
+Available algorithms are *value iteration* and *modified policy iteration*. The library support both the plain
+worst-case outcome method and a worst case with respect to a base distribution.
 
 Installation and Build Instruction
 ----------------------------------
@@ -36,23 +43,30 @@ See the README.rst
 Getting Started
 ---------------
 
-The main interface to the library is through the templated class GRMDP. The templated version of this class enable different definitions of the uncertainty set. The avialable specializations are:
+The main interface to the library is through the templated class GRMDP. The templated version of this class enable
+different definitions of the uncertainty set. The avialable specializations are:
 
 - craam::MDP : plain MDP with no definition of uncertainty
 - craam::RMDP_D : a robust/uncertain with discrete outcomes with the best/worst one chosen
 - craam::RMDP_L1 : a robust/uncertain with discrete outcomes with L1 constraints on the uncertainty
 
 
-States, actions, and outcomes are identified using 0-based contiguous indexes. The actions are indexed independently for each states and the outcomes are indexed independently for each state and action pair.
+States, actions, and outcomes are identified using 0-based contiguous indexes. The actions are indexed independently for
+each states and the outcomes are indexed independently for each state and action pair.
 
-Transitions are added through function add_transition. New states, actions, or outcomes are automatically added based on the new transition. The actual algorithms are solved using:
+Transitions are added through function add_transition. New states, actions, or outcomes are automatically added based on
+the new transition. The actual algorithms are solved using:
 
 | Method                  |  Algorithm     |
 | ----------------------- | ----------------
-| GRMDP::vi_gs            | Gauss-Seidel value iteration; runs in a single thread. Computes the worst-case outcome for each action.
-| GRMDP::vi_jac           | Jacobi value iteration; parallelized with OpenMP. Computes the worst-case outcome for each action.
-| GRMDP::mpi_jac          | Jacobi modified policy iteration; parallelized with OpenMP. Computes the worst-case outcome for each action. Generally, modified policy iteration is vastly more efficient than value iteration.
-| GRMDP::vi_jac_fix       | Jacobi value iteration for policy evaluation; parallelized with OpenMP. Computes the worst-case outcome for each action.
+| GRMDP::vi_gs            | Gauss-Seidel value iteration; runs in a single thread. Computes the worst-case outcome for
+each action.
+| GRMDP::vi_jac           | Jacobi value iteration; parallelized with OpenMP. Computes the worst-case outcome for each
+action.
+| GRMDP::mpi_jac          | Jacobi modified policy iteration; parallelized with OpenMP. Computes the worst-case outcome
+for each action. Generally, modified policy iteration is vastly more efficient than value iteration.
+| GRMDP::vi_jac_fix       | Jacobi value iteration for policy evaluation; parallelized with OpenMP. Computes the
+worst-case outcome for each action.
 
 
 For uncertain MDPs, each method supports average, robust, and optimistic computation modes.
@@ -127,17 +141,20 @@ References
 
 [Filar1997] Filar, J., & Vrieze, K. (1997). Competitive Markov decision processes. Springer.
 
-[Puterman2005] Puterman, M. L. (2005). Markov decision processes: Discrete stochastic dynamic programming. Handbooks in operations research and management …. John Wiley & Sons, Inc.
+[Puterman2005] Puterman, M. L. (2005). Markov decision processes: Discrete stochastic dynamic programming. Handbooks in
+operations research and management …. John Wiley & Sons, Inc.
 
 [Iyengar2005] Iyengar, G. N. G. (2005). Robust dynamic programming. Mathematics of Operations Research, 30(2), 1–29.
 
-[Petrik2014] Petrik, M., Subramanian S. (2014). RAAM : The benefits of robustness in approximating aggregated MDPs in reinforcement learning. In Neural Information Processing Systems (NIPS).
+[Petrik2014] Petrik, M., Subramanian S. (2014). RAAM : The benefits of robustness in approximating aggregated MDPs in
+reinforcement learning. In Neural Information Processing Systems (NIPS).
 
-[Petrik2016] Petrik, M., & Luss, R. (2016). Interpretable Policies for Dynamic Product Recommendations. In Uncertainty in Artificial Intelligence (UAI).
+[Petrik2016] Petrik, M., & Luss, R. (2016). Interpretable Policies for Dynamic Product Recommendations. In Uncertainty
+in Artificial Intelligence (UAI).
 */
 
-
-template <typename T> vector<size_t> sort_indexes(vector<T> const& v) {
+template <typename T>
+vector<size_t> sort_indexes(vector<T> const& v) {
     /** \brief Sort indices by values in ascending order
      *
      * \param v List of values
@@ -146,18 +163,19 @@ template <typename T> vector<size_t> sort_indexes(vector<T> const& v) {
 
     // initialize original index locations
     vector<size_t> idx(v.size());
-    for (size_t i = 0; i != idx.size(); ++i) idx[i] = i;
+    for (size_t i = 0; i != idx.size(); ++i)
+        idx[i] = i;
 
     // sort indexes based on comparing values in v
-    sort(idx.begin(), idx.end(), [&v](size_t i1, size_t i2) {return v[i1] < v[i2];});
+    sort(idx.begin(), idx.end(), [&v](size_t i1, size_t i2) { return v[i1] < v[i2]; });
 
     return idx;
 }
 
 template vector<size_t> sort_indexes<long>(vector<long> const&);
 
-template <typename T> vector<size_t> sort_indexes_desc(vector<T> const& v)
-{
+template <typename T>
+vector<size_t> sort_indexes_desc(vector<T> const& v) {
     /** \brief Sort indices by values in descending order
      *
      * \param v List of values
@@ -166,15 +184,16 @@ template <typename T> vector<size_t> sort_indexes_desc(vector<T> const& v)
 
     // initialize original index locations
     vector<size_t> idx(v.size());
-    for (size_t i = 0; i != idx.size(); ++i) idx[i] = i;
+    for (size_t i = 0; i != idx.size(); ++i)
+        idx[i] = i;
 
     // sort indexes based on comparing values in v
-    sort(idx.begin(), idx.end(), [&v](size_t i1, size_t i2) {return v[i1] > v[i2];});
+    sort(idx.begin(), idx.end(), [&v](size_t i1, size_t i2) { return v[i1] > v[i2]; });
 
     return idx;
 }
 
-pair<numvec,prec_t> worstcase_l1(numvec const& z, numvec const& q, prec_t t){
+pair<numvec, prec_t> worstcase_l1(numvec const& z, numvec const& q, prec_t t) {
     /**
     Computes the solution of:
     min_p   p^T * z
@@ -201,23 +220,21 @@ pair<numvec,prec_t> worstcase_l1(numvec const& z, numvec const& q, prec_t t){
     numvec o(q);
 
     auto k = smallest[0];
-    auto epsilon = min(t/2, 1-q[k]);
+    auto epsilon = min(t / 2, 1 - q[k]);
 
     o[k] += epsilon;
 
     auto i = sz - 1;
-    while(epsilon > 0){
+    while (epsilon > 0) {
         k = smallest[i];
-        auto diff = min( epsilon, o[k] );
+        auto diff = min(epsilon, o[k]);
         o[k] -= diff;
         epsilon -= diff;
         i -= 1;
     }
 
-    auto r = inner_product(o.begin(),o.end(),z.begin(), (prec_t) 0.0);
+    auto r = inner_product(o.begin(), o.end(), z.begin(), (prec_t)0.0);
 
-    return make_pair(move(o),r);
+    return make_pair(move(o), r);
 }
-
-
 }
