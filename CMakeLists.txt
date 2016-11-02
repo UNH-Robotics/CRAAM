@@ -100,7 +100,7 @@ set(SRCS
         )
 set(TSTS ${CMAKE_CURRENT_SOURCE_DIR}/test/test.cpp)
 set(DEV ${CMAKE_CURRENT_SOURCE_DIR}/test/dev.cpp)
-set(BANDITS ${CMAKE_CURRENT_SOURCE_DIR}/test/bandits.cpp src/algorithms/ThompsonSampling.cpp src/algorithms/UCB.cpp include/algorithms/ThompsonSampling.hpp include/algorithms/ValueIteration.hpp include/algorithms/UCB.hpp src/algorithms/ValueIteration.cpp)
+set(BANDITS ${CMAKE_CURRENT_SOURCE_DIR}/test/bandits.cpp src/algorithms/ThompsonSampling.cpp src/algorithms/UCB.cpp include/algorithms/ThompsonSampling.hpp include/algorithms/ValueIteration.hpp include/algorithms/UCB.hpp src/algorithms/ValueIteration.cpp include/domains/MultiArmBandit.hpp include/experiment/ConfigurationExecutor.hpp)
 set(BENCH ${CMAKE_CURRENT_SOURCE_DIR}/test/benchmark.cpp)
 
 if (BUILD_ADVANCED)
